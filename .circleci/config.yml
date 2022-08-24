@@ -1,0 +1,47 @@
+version: 2.1
+orbs:
+  node: circleci/node@4.1.0
+  azure-cli: circleci/azure-cli@1.2.2
+jobs:
+  build:
+    executor: node/default
+    working_directory: ~/project/server
+    steps:
+      - checkout
+      - run:
+          command: ls -la
+          name: list files
+      - run:
+          command: cd server/ && npm ci && npm run build:production
+      - azure-cli/install
+      - azure-cli/login-with-service-principal
+      - run:
+          name: Install Azure functions tools
+          command: sudo npm i -g azure-functions-core-tools@4 --unsafe-perm true
+      - run:
+          name: Deploy to Azure function App
+          command: cd server && ls -la && func azure functionapp publish $FUNCTION_APP_NAME --javascript --worker-runtime node
+
+  # deploy: # this can be any name you choose
+  #   executor: node/default
+  #   steps:
+  #     - attach_workspace:
+  #         at: ~/project/server
+  #     - azure-cli/install
+  #     - azure-cli/login-with-service-principal
+  #     - run:
+  #         name: Install Azure functions tools
+  #         command: sudo npm i -g azure-functions-core-tools@4 --unsafe-perm true
+  #     - run:
+  #         command: cd server && ls -la
+      # - run:
+      #     name: Deploy to Azure function App
+      #     command: func azure functionapp publish $FUNCTION_APP_NAME --javascript --worker-runtime node
+
+workflows:
+  deploy-to-azure-function-app:
+    jobs:
+      - build:
+          filters:
+            branches:
+              only: main # only deploy when on main

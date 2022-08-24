@@ -1,0 +1,1259 @@
+openapi: 3.0.0
+info:
+  description: |
+    SIH Backend Server Documentation
+  version: "1.0.0"
+  title: SIH-Backend
+  contact:
+    email: raghhavdturki@gmail.com
+  license:
+    name: Apache 2.0
+    url: 'http://www.apache.org/licenses/LICENSE-2.0.html'
+servers:
+  - description: Development Server
+    url: http://localhost:7071/api/
+  - description: Production Server
+    url: https://sih-2022-server.azurewebsites.net/api/
+  - description: Chat Server
+    url: https://sih-email.herokuapp.com/api/chat/
+paths:
+  /createAdmin:
+    post: 
+      tags:
+        - admin
+      summary: Create Admin Account
+      operationId: createAdmin
+      requestBody:
+        $ref: '#/components/requestBodies/CreateAdminInput'
+      responses:
+        '400':
+          description: Invalid input
+        '500':
+          description: Internal Server Error
+        '200':
+          description: Admin Created Successfully
+  /createEmployee:
+    post: 
+      tags:
+        - admin
+      security: 
+        - bearerAuth: []
+      summary: Create Employee Account
+      operationId: createEmployee
+      requestBody:
+        $ref: '#/components/requestBodies/CreateEmployeeInput'
+      responses:
+        '400':
+          description: Invalid input
+        '500':
+          description: Internal Server Error
+        '200':
+          description: Employee Created Successfully
+  /createHOD:
+    post: 
+      tags:
+        - admin
+      security: 
+        - bearerAuth: []
+      summary: Create HOD Account
+      operationId: createHOD
+      requestBody:
+        $ref: '#/components/requestBodies/CreateEmployeeInput'
+      responses:
+        '400':
+          description: Invalid input
+        '500':
+          description: Internal Server Error
+        '200':
+          description: HOD Created Successfully
+  /login:
+    post:
+      tags: 
+        - login
+      summary: Login
+      operationId: login
+      requestBody:
+        $ref: '#/components/requestBodies/LoginInput'
+      responses:
+        '400':
+          description: Invalid input
+        '500':
+          description: Internal Server Error
+        '200':
+          description: Logged In Successfully!
+          content:
+            application/json:
+              schema: 
+                $ref: '#/components/schemas/LoginResponse'
+  /uploadFile:
+    post:
+      tags:
+        - employee
+      security: 
+        - bearerAuth: []
+      summary: Upload File
+      operationId: uploadFile
+      parameters: 
+        - in: query
+          name: filename
+          description: filename
+          schema:
+            type: string
+          required: true
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                filename:
+                    type: string
+                    format: binary
+      responses:
+        '400':
+          description: Invalid input
+        '500':
+          description: Internal Server Error
+        '200':
+          description: File Uploaded Successfully
+          content:
+            application/json:
+              schema:
+                properties:
+                  url:
+                    type: string
+  /createDocument:
+    post:
+      tags:
+        - employee
+      security: 
+        - bearerAuth: []
+      summary: Create Document
+      operationId: createDocument
+      requestBody:
+        $ref: '#/components/requestBodies/CreateDocumentInput'
+      responses:
+        '400':
+          description: Invalid input
+        '500':
+          description: Internal Server Error
+        '200':
+          description: Document Created Successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreateDocumentResponse'
+  /rooms:
+    get:
+      tags:
+        - chat
+      security:
+       - bearerAuth: []
+      summary: Fetch all the rooms the employee is a part of
+      operationId: rooms
+      parameters: 
+        - in: query
+          name: employeeId
+          schema:
+            type: string
+          required: true
+      responses:
+        '400':
+          description: Invalid input
+        '500':
+          description: Internal Server Error
+        '200':
+          description: Rooms fetched successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetRoomsResponse'
+  /messages:
+    get:
+      tags:
+        - chat
+      security:
+        - bearerAuth: []
+      summary: Fetch all the messages in a room
+      operationId: messages
+      parameters: 
+        - in: query
+          name: roomId
+          schema:
+            type: string
+          required: true
+      responses:
+        '400':
+          description: Invalid input
+        '500':
+          description: Internal Server Error
+        '200':
+          description: Messages fetched successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetMessagesResponse'
+  /assignDocument:
+    post:
+      tags:
+        - employee
+      security:
+        - bearerAuth: []
+      summary: Assign a document to an employee in your department
+      operationId: assignDocument
+      requestBody:
+        $ref: '#/components/requestBodies/AssignDocumentInput'
+      responses:
+        '400':
+          description: Invalid input
+        '500':
+          description: Internal Server Error
+        '200':
+          description: Document assigned successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AssignDocumentResponse'
+  /forwardToAdmin:
+    post:
+      tags:
+        - employee
+      security:
+        - bearerAuth: []
+      summary: Forward a document to an admin
+      operationId: forwardToAdmin
+      requestBody:
+        $ref: '#/components/requestBodies/ForwardToAdminInput'
+      responses:
+        '400':
+          description: Invalid input
+        '500':
+          description: Internal Server Error
+        '200':
+          description: Document forwarded successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AssignDocumentResponse'
+  /rejectDocument:
+    post:
+      tags:
+        - employee
+      security:
+        - bearerAuth: []
+      summary: Reject a document
+      operationId: rejectDocument
+      requestBody:
+        $ref: '#/components/requestBodies/RejectDocumentInput'
+      responses:
+        '400':
+          description: Invalid input
+        '500':
+          description: Internal Server Error
+        '200':
+          description: Document rejected successfully
+  /conversation:
+    get:
+      tags:
+        - chat
+      security:
+        - bearerAuth: []
+      summary: Fetch a conversation from a documentId
+      operationId: conversation
+      parameters: 
+        - in: query
+          name: documentId
+          schema:
+            type: string
+          required: true
+      responses:
+        '400':
+          description: Invalid input
+        '500':
+          description: Internal Server Error
+        '200':
+          description: Conversation fetched successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Conversation'
+  /trackStatus:
+    get:
+      tags:
+        - employee
+      security:
+        - bearerAuth: []
+      summary: Track the status of a document
+      operationId: trackStatus
+      parameters: 
+        - in: query
+          name: documentId
+          schema:
+            type: string
+          required: true
+        - in: query
+          name: employeeId
+          schema:
+            type: string
+          required: true
+      responses:
+        '400':
+          description: Invalid input
+        '500':
+          description: Internal Server Error
+        '200':
+          description: Status tracked successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TrackStatusResponse'
+  /getEmployee:
+    get:
+      tags:
+        - employee
+        - hod
+        - admin
+      security:
+        - bearerAuth: []
+      summary: Get all employees from a department or get a specific employee(use either the employeeId or documentId, not both)
+      operationId: getEmployee
+      parameters: 
+        - in: query
+          name: departmentId
+          schema:
+            type: string
+        - in: query
+          name: employeeId
+          schema:
+            type: string
+      responses:
+        '400':
+          description: Invalid input
+        '500':
+          description: Internal Server Error
+        '200':
+          description: Employees fetched successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Employee'
+  /loadMessages:
+    get:
+      tags:
+        - chat
+      security:
+        - bearerAuth: []
+      summary: Load all messages(sent or primary) for an employee
+      operationId: loadMessages
+      parameters: 
+        - in: query
+          name: employeeId
+          schema:
+            type: string
+          required: true
+        - in: query
+          name: pageNo
+          schema:
+            type: number
+          required: true
+        - in: query
+          name: filter
+          schema:
+            type: string
+          required: true
+      responses:
+        '400':
+          description: Invalid input
+        '500':
+          description: Internal Server Error
+        '200':
+          description: Messages loaded successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Message'
+  /listDocument:
+    get:
+      tags:
+        - employee
+      security:
+        - bearerAuth: []
+      summary: List all the documents created by an employee
+      operationId: listDocument
+      parameters: 
+        - in: query
+          name: employeeId
+          schema:
+            type: string
+          required: true
+      responses:
+        '400':
+          description: Invalid input
+        '500':
+          description: Internal Server Error
+        '200':
+          description: Documents fetched successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Document'
+  /getAdmin: 
+    get:
+      tags:
+        - admin
+      security:
+        - bearerAuth: []
+      summary: Get all admin from a department or get a specific admin(use either the employeeId or documentId, not both)
+      operationId: getAdmin
+      responses:
+        '400':
+          description: Invalid input
+        '500':
+          description: Internal Server Error
+        '200':
+          description: Admins fetched successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Admin'
+  /requestForgotPassword:
+    get:
+      tags:
+        - employee
+        - hod
+        - admin
+      security:
+        - bearerAuth: []
+      summary: Request a forgot password link on your personal email
+      operationId: requestForgotPassword
+      parameters: 
+        - in: query
+          name: email
+          schema:
+            type: string
+          required: true
+      responses:
+        '400':
+          description: Invalid input
+        '500':
+          description: Internal Server Error
+        '200':
+          description: Forgot password link sent successfully
+  /forgotPassword:
+    get:
+      tags:
+        - employee
+        - hod
+        - admin
+      security:
+        - bearerAuth: []
+      summary: Reset your password
+      operationId: forgotPassword
+      parameters: 
+        - in: query
+          name: token
+          schema:
+            type: string
+          required: true
+        - in: query
+          name: newPassword
+          schema:
+            type: string
+          required: true
+      responses:
+        '400':
+          description: Invalid input
+        '500':
+          description: Internal Server Error
+        '200':
+          description: Password reset successfully
+  /changePassword:
+    get:
+      tags:
+        - employee
+        - hod
+        - admin
+      security:
+        - bearerAuth: []
+      summary: Change your password when you are logged in
+      operationId: changePassword
+      parameters: 
+        - in: query
+          name: oldPassword
+          schema:
+            type: string
+          required: true
+        - in: query
+          name: newPassword
+          schema:
+            type: string
+          required: true
+        - in: query
+          name: employeeId
+          schema:
+            type: string
+          required: true
+      responses:
+        '400':
+          description: Invalid input
+        '500':
+          description: Internal Server Error
+        '200':
+          description: Password changed successfully
+  /updateProfile:
+    put:
+      tags:
+        - employee
+        - hod
+        - admin
+      security:
+        - bearerAuth: []
+      summary: Update your profile
+      operationId: updateProfile
+      requestBody:
+        $ref: '#/components/requestBodies/UpdateProfileInput'
+      responses:
+        '400':
+          description: Invalid input
+        '500':
+          description: Internal Server Error
+        '200':
+          description: Profile updated successfully
+  /uploadProfilePicture:
+    post:
+      tags:
+        - employee
+      security: 
+        - bearerAuth: []
+      summary: Upload Profile Picture
+      operationId: uploadProfilePicture
+      parameters: 
+        - in: query
+          name: filename
+          description: filename
+          schema:
+            type: string
+          required: true
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                filename:
+                    type: string
+                    format: binary
+      responses:
+        '400':
+          description: Invalid input
+        '500':
+          description: Internal Server Error
+        '200':
+          description: File Uploaded Successfully
+          content:
+            application/json:
+              schema:
+                properties:
+                  url:
+                    type: string
+  /getDocument:
+    get:
+      tags:
+        - employee
+        - hod
+        - admin
+      security:
+        - bearerAuth: []
+      summary: Get a specific document
+      operationId: getDocument
+      parameters: 
+        - in: query
+          name: documentId
+          schema:
+            type: string
+          required: true
+        - in: query
+          name: employeeId
+          schema:
+            type: string
+          required: true
+        - in: query
+          name: role
+          schema:
+            type: string
+          required: true
+      responses:
+        '400':
+          description: Invalid input
+        '500':
+          description: Internal Server Error
+        '200':
+          description: Document fetched successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Document'
+  /getYourApprovedDocuments:
+    get:
+      tags:
+        - employee
+        - hod
+      security: 
+        - bearerAuth: []
+      summary: Get all the documents approved by you
+      operationId: getYourApprovedDocuments
+      parameters: 
+        - in: query
+          name: employeeId
+          schema:
+            type: string
+          required: true
+      responses:
+        '400':
+          description: Invalid input
+        '500':
+          description: Internal Server Error
+        '200':
+          description: Documents fetched successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Document'
+  /getYourRejectedDocuments:
+    get:
+      tags:
+        - employee
+        - hod
+      security: 
+        - bearerAuth: []
+      summary: Get all the documents rejected by you
+      operationId: getYourRejectedDocuments
+      parameters: 
+        - in: query
+          name: employeeId
+          schema:
+            type: string
+          required: true
+      responses:
+        '400':
+          description: Invalid input
+        '500':
+          description: Internal Server Error
+        '200':
+          description: Documents fetched successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Document'
+  /getYourPendingDocuments:
+    get:
+      tags:
+        - employee
+        - hod
+        - admin
+      security: 
+        - bearerAuth: []
+      summary: Get all the documents rejected by you
+      operationId: getYourRejectedDocuments
+      parameters: 
+        - in: query
+          name: employeeId
+          schema:
+            type: string
+          required: true
+        - in: query
+          name: role
+          schema:
+            type: string
+          required: true
+      responses:
+        '400':
+          description: Invalid input
+        '500':
+          description: Internal Server Error
+        '200':
+          description: Documents fetched successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Document'
+components:
+  schemas:
+    Employee:
+      type: object
+      properties:
+        firstName: 
+          type: string
+        lastName:
+          type: string
+        employeeId: 
+          type: string
+        email: 
+          type: string
+        personal_email: 
+          type: string
+        contactNo: 
+          type: string
+        gender: 
+          type: string
+        dob: 
+          type: string
+          format: date-time
+        addr_line1: 
+          type: string
+        addr_line2: 
+          type: string
+        city: 
+          type: string
+        state: 
+          type: string
+        country: 
+          type: string
+          default: India
+        office_branch: 
+          type: string
+        password: 
+          type: string
+        role: 
+          type: string
+          default: employee
+        department: 
+          type: string
+        resetPasswordToken: 
+          type: string
+          default: null
+        resetPasswordExpires: 
+          type: string
+          format: date-time
+        profile:
+          type: object
+          properties:
+            firstName: 
+              type: string
+            lastName:
+              type: string
+            employeeId: 
+              type: string
+            email: 
+              type: string
+            contactNo: 
+              type: string
+            gender: 
+              type: string
+            dob: 
+              type: string
+              format: date-time
+            addr_line1: 
+              type: string
+            addr_line2: 
+              type: string
+            city: 
+              type: string
+            state: 
+              type: string
+            country: 
+              type: string
+              default: India
+            office_branch: 
+              type: string
+            role: 
+              type: string
+              default: employee
+            department: 
+              type: string
+    Admin:
+      type: object
+      properties:
+        firstName: 
+          type: string
+        lastName:
+          type: string
+        employeeId: 
+          type: string
+        email: 
+          type: string
+        personal_email: 
+          type: string
+        contactNo: 
+          type: string
+        gender: 
+          type: string
+        dob: 
+          type: string
+          format: date-time
+        addr_line1: 
+          type: string
+        addr_line2: 
+          type: string
+        city: 
+          type: string
+        state: 
+          type: string
+        country: 
+          type: string
+          default: India
+        office_branch: 
+          type: string
+        password: 
+          type: string
+        role: 
+          type: string
+          default: admin
+        department: 
+          type: string
+        resetPasswordToken: 
+          type: string
+        resetPasswordExpires: 
+          type: string
+          format: date-time
+        profile:
+          type: object
+          properties:
+            firstName: 
+              type: string
+            lastName:
+              type: string
+            employeeId: 
+              type: string
+            email: 
+              type: string
+            contactNo: 
+              type: string
+            gender: 
+              type: string
+            dob: 
+              type: string
+              format: date-time
+            addr_line1: 
+              type: string
+            addr_line2: 
+              type: string
+            city: 
+              type: string
+            state: 
+              type: string
+            country: 
+              type: string
+              default: India
+            office_branch: 
+              type: string
+            role: 
+              type: string
+              default: admin
+            department: 
+              type: string
+    Conversation:
+      type: object
+      properties:
+        conversationName:
+          type: string
+        documentId:
+          type: string
+        participants:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: string
+              info:
+                type: object
+                properties:
+                  id:
+                    type: string
+                  name:
+                    type: string
+    Message:
+      type: object
+      properties:
+        senderId:
+          type: string
+        subject:
+          type: string
+        content:
+          type: string
+        conversationId:
+          type: string
+        senderName: 
+          type: string
+        createdAt: 
+          type: string
+          format: date-time
+        updatedAt: 
+          type: string
+          format: date-time
+    Document:
+      type: object
+      properties:
+        documentId: 
+          type: string
+        subject: 
+          type: string
+        description: 
+          type: string
+        employeeId: 
+          type: string
+        main_file: 
+          type: array
+          items:
+            type: string
+        reference_files: 
+          type: array
+          items:
+            type: string
+        permissions: 
+          type: array
+          items:
+            type: string  
+        status: 
+          type: array
+          items:
+            type: string
+        time_recieved: 
+          type: array
+          items:
+            type: string
+            format: date-time
+        time_returned: 
+          type: array
+          items:
+            type: string
+            format: date-time
+        rejection_reason: 
+          type: string
+        category: 
+          type: string
+
+    CreateAdminInput:
+      type: object
+      properties:
+        firstName: 
+          type: string
+        lastName:
+          type: string
+        personalEmail: 
+          type: string
+        contactNo: 
+          type: string
+        gender: 
+          type: string
+        dob: 
+          type: string
+          format: date-time
+        addr_line1: 
+          type: string
+        addr_line2: 
+          type: string
+        city: 
+          type: string
+        state: 
+          type: string
+        office_branch: 
+          type: string
+        role: 
+          type: string
+        department: 
+          type: string
+    CreateEmployeeInput:
+      type: object
+      properties:
+        firstName: 
+          type: string
+        lastName:
+          type: string
+        personalEmail: 
+          type: string
+        contactNo: 
+          type: string
+        gender: 
+          type: string
+        dob: 
+          type: string
+          format: date-time
+        addr_line1: 
+          type: string
+        addr_line2: 
+          type: string
+        city: 
+          type: string
+        state: 
+          type: string
+        office_branch: 
+          type: string
+        role: 
+          type: string
+        department: 
+          type: string
+    LoginInput:
+      type: object
+      properties:
+        employeeId:
+          type: string
+        password:
+          type: string
+        role: 
+          type: string
+          enum:
+            - admin
+            - employee
+            - hod
+    CreateDocumentInput:
+      type: object
+      properties:
+        employeeId: 
+          type: string
+        employee_name: 
+          type: string
+        subject: 
+          type: string
+        description: 
+          type: string
+        main_file: 
+          type: array
+          items:
+            type: string
+        reference_file:
+          type: array
+          items:
+            type: string
+        forwarding_dept: 
+          type: string
+        category: 
+          type: string
+    AssignDocumentInput:
+      type: object
+      properties:
+        adminId: 
+          type: string
+        department: 
+          type: string
+        documentId: 
+          type: string
+        employeeToAssign: 
+          type: string
+    ForwardToAdminInput:
+      type: object
+      properties:
+        employeeId: 
+          type: string
+        department: 
+          type: string  
+        documentId: 
+          type: string
+    RejectDocumentInput:
+      type: object
+      properties:
+        employeeId: 
+          type: string
+        documentId: 
+          type: string
+        reason: 
+          type: string
+    LoginResponse:
+      type: object
+      properties:
+        token:
+          type: string
+        profile:
+          type: object
+    CreateDocumentResponse:
+      type: object
+      properties: 
+        roomId: 
+          type: string
+        assignedEmployeeName:
+          type: string
+        documentId: 
+          type: string
+        subject: 
+          type: string
+        description: 
+          type: string
+        employeeId: 
+          type: string
+        main_file: 
+          type: array
+          items:
+            type: string
+        reference_files: 
+          type: array
+          items:
+            type: string
+        permissions: 
+          type: array
+          items:
+            type: string  
+        status: 
+          type: array
+          items:
+            type: string
+        time_recieved: 
+          type: array
+          items:
+            type: string
+            format: date-time
+        time_returned: 
+          type: array
+          items:
+            type: string
+            format: date-time
+        rejection_reason: 
+          type: string
+        category: 
+          type: string
+    UpdateProfileInput:
+      type: object
+      properties:
+        employeeId:
+          type: string
+        firstName:
+          type: string
+        lastName:
+          type: string
+        gender:
+          type: string
+        dob:
+          type: string
+          format: date-time
+        personal_email:
+          type: string
+        contactNo: 
+          type: string
+        addr_line1:
+          type: string
+        addr_line2:
+          type: string
+        city:
+          type: string
+        state:
+          type: string
+        role:
+          type: string
+        picture:
+          type: string
+    GetRoomsResponse:
+      type: array
+      items:
+        $ref: "#/components/schemas/Conversation"
+    GetMessagesResponse:
+      type: array
+      items:
+        $ref: "#/components/schemas/Message"
+    AssignDocumentResponse:
+      type: object
+      properties:
+        employeeAssignedId:
+          type: string
+        employeeAssignedName:
+          type: string
+    TrackStatusResponse:
+      type: array
+      items:
+        properties:
+          employeeName: 
+            type: string
+          employeeId: 
+            type: string
+          employeeDepartment: 
+            type: string
+          time_elapsed: 
+            type: integer
+            format: int32
+          status:
+            type: string
+          time_recieved:
+            type: string
+            format: date-time
+          time_returned:
+            type: string
+            format: date-time
+          rejection_reason:
+            type: string
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: Iron Sealed Token
+  requestBodies:
+    CreateAdminInput:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/CreateAdminInput'
+        application/xml:
+          schema:
+            $ref: '#/components/schemas/CreateAdminInput'
+      required: true
+    CreateEmployeeInput:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/CreateEmployeeInput'
+        application/xml:
+          schema:
+            $ref: '#/components/schemas/CreateEmployeeInput'
+      required: true
+    LoginInput:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/LoginInput'
+        application/xml:
+          schema:
+            $ref: '#/components/schemas/LoginInput'
+      required: true
+    CreateDocumentInput:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/CreateDocumentInput'
+        application/xml:
+          schema:
+            $ref: '#/components/schemas/CreateDocumentInput'
+      required: true
+    AssignDocumentInput:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/AssignDocumentInput'
+        application/xml:
+          schema:
+            $ref: '#/components/schemas/AssignDocumentInput'
+      required: true
+    ForwardToAdminInput:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ForwardToAdminInput'
+        application/xml:
+          schema:
+            $ref: '#/components/schemas/ForwardToAdminInput'
+      required: true
+    RejectDocumentInput:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/RejectDocumentInput'
+        application/xml:
+          schema:
+            $ref: '#/components/schemas/RejectDocumentInput'
+      required: true
+    UpdateProfileInput:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/UpdateProfileInput'
+        application/xml:
+          schema:
+            $ref: '#/components/schemas/UpdateProfileInput'
+      required: true
